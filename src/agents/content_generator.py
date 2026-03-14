@@ -1,17 +1,21 @@
 import os
+import sys
 import time
 from dotenv import load_dotenv
+
+# Agregar src al path para imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 load_dotenv()
 
 try:
-    from ..services.cache_service import CacheService
+    from services.cache_service import CacheService
     CACHE_AVAILABLE = True
 except ImportError:
     CACHE_AVAILABLE = False
 
 try:
-    from .research_agent import ResearchAgent
+    from agents.research_agent import ResearchAgent
     RESEARCH_AVAILABLE = True
 except ImportError:
     RESEARCH_AVAILABLE = False

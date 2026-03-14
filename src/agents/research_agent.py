@@ -1,7 +1,11 @@
 import os
+import sys
 import time
 from typing import Optional, List, Dict, Any
 from dotenv import load_dotenv
+
+# Agregar src al path para imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 load_dotenv()
 
@@ -11,7 +15,7 @@ try:
 except ImportError:
     TAVILY_AVAILABLE = False
 
-from ..services.cache_service import CacheService
+from services.cache_service import CacheService
 
 
 class ResearchAgent:
