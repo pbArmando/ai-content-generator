@@ -37,10 +37,13 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Create outputs directory
+        run: mkdir -p outputs
+
       - name: Install dependencies
         run: |
           python -m venv venv
-          source venv/bin/activate
+          . venv/bin/activate
           pip install -r requirements.txt
 
       - name: Create environment file
@@ -51,24 +54,22 @@ jobs:
       - name: Generate article
         id: generate
         run: |
-          source venv/bin/activate
-          python generate_article.py << EOF
-${{ github.event.inputs.topic }}
-${{ github.event.inputs.use_research == 'true' && '1' || '2' }}
-${{ github.event.inputs.tone == 'profesional' && '1' || github.event.inputs.tone == 'casual' && '2' || '3' }}
-EOF
+          . venv/bin/activate
+          echo "${{ github.event.inputs.topic }}" | python generate_article.py
 
       - name: Upload article as artifact
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: generated-article
           path: outputs/
           retention-days: 30
 
       - name: Commit and push article
+        if: success()
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add outputs/
           git commit -m "Generated article: ${{ github.event.inputs.topic }}" || echo "No changes to commit"
-          git push
+          git push || echo "Push failed, skipping"
