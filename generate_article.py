@@ -1,37 +1,32 @@
 """
-Script para generar artículos completos
+Script para generar artículos completos - Versión Optimizada
+Usa agentes independientes para menor consumo de tokens
 """
 
 import os
 import sys
 from datetime import datetime
 
-# Agregar el directorio src al path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from agents.content_generator import ContentGenerator
+from agents.orchestrator import OrchestratorAgent
+from agents.research_agent import ResearchAgent
+from services.cache_service import CacheService
+
 
 def clear_screen():
-    """Limpia la pantalla"""
     os.system('cls' if os.name == 'nt' else 'clear')
 
+
 def print_header():
-    """Imprime el encabezado"""
     print("=" * 70)
-    print("📰 GENERADOR DE ARTÍCULOS COMPLETOS CON IA")
+    print("📰 GENERADOR DE ARTÍCULOS OPTIMIZADO")
+    print("   [Agentes independientes - Menor consumo de tokens]")
     print("=" * 70)
     print()
 
+
 def format_article_markdown(article):
-    """
-    Formatea el artículo en Markdown
-    
-    Args:
-        article (dict): El artículo generado
-        
-    Returns:
-        str: El artículo en formato Markdown
-    """
     markdown = f"""# {article['title']}
 
 **Tema:** {article['topic']}  
@@ -48,11 +43,11 @@ def format_article_markdown(article):
 ---
 
 """
-    
-    # Agregar secciones si existen
-    for i, section in enumerate(article['sections'], 1):
-        markdown += f"## {section['title']}\n\n{section['content']}\n\n---\n\n"
-    
+
+    if article.get('sections'):
+        for section in article['sections']:
+            markdown += f"## {section['title']}\n\n{section['content']}\n\n---\n\n"
+
     markdown += f"""## Conclusión
 
 {article['conclusion']}
@@ -61,21 +56,10 @@ def format_article_markdown(article):
 
 *Artículo generado automáticamente con IA*
 """
-    
     return markdown
 
+
 def save_article(article, format='markdown'):
-    """
-    Guarda el artículo en archivo
-    
-    Args:
-        article (dict): El artículo a guardar
-        format (str): Formato del archivo (markdown, txt)
-        
-    Returns:
-        str: Ruta del archivo guardado
-    """
-    # Crear nombre de archivo seguro
     safe_topic = "".join(c for c in article['topic'] if c.isalnum() or c in (' ', '-', '_')).rstrip()
     safe_topic = safe_topic.replace(' ', '_')
     
@@ -90,7 +74,6 @@ def save_article(article, format='markdown'):
 TEMA: {article['topic']}
 TONO: {article['tone']}
 FECHA: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-PALABRAS: ~{article['word_count']}
 {"="*70}
 
 INTRODUCCIÓN:
@@ -110,23 +93,28 @@ CONCLUSIÓN:
     
     return filename
 
+
 def main():
-    """Función principal"""
     clear_screen()
     print_header()
     
     try:
         use_research = False
-        print("🔧 Inicializando sistema...")
+        print("🔧 Inicializando agentes...")
         
         try:
-            generator = ContentGenerator(provider="groq", enable_research=True)
+            research_agent = ResearchAgent()
+            orchestrator = OrchestratorAgent()
             use_research = True
-            print("✅ Sistema listo (con búsqueda web)")
+            print("✅ Agentes listos (con investigación web)")
+        except ValueError as e:
+            print(f"⚠️ Investigación no disponible: {e}")
+            orchestrator = OrchestratorAgent()
+            print("✅ Agentes listos (sin investigación)")
         except Exception as e:
-            print(f"⚠️ Búsqueda web no disponible: {e}")
-            generator = ContentGenerator(provider="groq")
-            print("✅ Sistema listo (sin búsqueda web)")
+            print(f"⚠️ Error: {e}")
+            orchestrator = OrchestratorAgent()
+            print("✅ Agentes listos (modo básico)")
         
         print()
         
@@ -140,12 +128,10 @@ def main():
         
         if use_research:
             print("\n¿Deseas buscar información actualizada en la web?")
-            print("  1. Sí (recomendado - información más actualizada)")
-            print("  2. No (usar solo conocimiento del modelo)")
+            print("  1. Sí (recomendado)")
+            print("  2. No")
             research_choice = input("Elige (1-2) [1]: ").strip() or "1"
             use_research = (research_choice == "1")
-        else:
-            use_research = False
         
         print("\nTonos disponibles:")
         print("  1. Profesional")
@@ -156,60 +142,55 @@ def main():
         tones = {"1": "profesional", "2": "casual", "3": "técnico"}
         tone = tones.get(tone_choice, "profesional")
         
-        research_info = "con investigación web" if use_research else "sin investigación"
-        
         print("\n" + "="*70)
-        print(f"🤖 Generando artículo completo sobre: '{topic}'")
+        print(f"🤖 Generando artículo sobre: '{topic}'")
         print(f"📊 Tono: {tone}")
-        print(f"🔍 Modo: {research_info}")
-        print("⏳ Esto tomará 30-90 segundos...")
+        print("⏳ Procesando...")
         print("="*70)
         
-        article = generator.generate_full_article(topic, tone, use_research=use_research)
+        research_context = ""
+        if use_research:
+            print("\n🔍 Investigando tema...")
+            try:
+                research_data = research_agent.research_topic(topic)
+                research_context = research_agent.format_for_prompt(research_data)
+                print(f"   ✅ {len(research_data.get('sources', []))} fuentes encontradas")
+            except Exception as e:
+                print(f"   ⚠️ Error en investigación: {e}")
         
-        # Verificar si hubo error
+        article = orchestrator.generate_article(topic, tone, research_context)
+        
         if "error" in article:
             print(f"\n❌ {article['error']}")
             return
         
-        # Mostrar resultado
         print("\n" + "="*70)
-        print("✅ ARTÍCULO GENERADO EXITOSAMENTE")
+        print("✅ ARTÍCULO GENERADO")
         print("="*70)
         print(f"\n📊 Estadísticas:")
         print(f"   - Título: {article['title']}")
         print(f"   - Palabras: ~{article['word_count']}")
-        print(f"   - Secciones: {len(article['sections'])}")
         
         if article.get('research_data') and article['research_data'].get('sources'):
-            sources = article['research_data']['sources']
-            print(f"   - Fuentes consultadas: {len(sources)}")
+            print(f"   - Fuentes: {len(article['research_data']['sources'])}")
         
-        # Guardar artículo
         filename_md = save_article(article, format='markdown')
-        filename_txt = save_article(article, format='txt')
         
-        print(f"\n💾 Guardado en:")
-        print(f"   - Markdown: {filename_md}")
-        print(f"   - Texto: {filename_txt}")
+        print(f"\n💾 Guardado: {filename_md}")
         
-        # Preguntar si quiere ver el contenido
-        view = input("\n¿Quieres ver el artículo completo? (s/n): ").strip().lower()
+        view = input("\n¿Quieres ver el artículo? (s/n): ").strip().lower()
         if view == 's':
             print("\n" + "="*70)
             print(format_article_markdown(article))
             print("="*70)
         
-        print("\n✅ ¡Proceso completado exitosamente!")
+        print("\n✅ ¡Completado!")
         
     except KeyboardInterrupt:
-        print("\n\n⚠️ Proceso cancelado por el usuario")
+        print("\n\n⚠️ Proceso cancelado")
     except Exception as e:
         print(f"\n❌ Error: {str(e)}")
-        print("\n💡 Verifica que:")
-        print("   - Tu GOOGLE_API_KEY esté correcta en .env")
-        print("   - Tengas conexión a internet")
-        print("   - No hayas excedido los límites de la API (espera 1 minuto)")
+
 
 if __name__ == "__main__":
     main()
