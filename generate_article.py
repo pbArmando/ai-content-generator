@@ -11,6 +11,7 @@ Uso:
 import os
 import sys
 import argparse
+import pathlib
 
 # Configurar UTF-8 para emojis en Windows
 if os.name == 'nt':
@@ -19,11 +20,15 @@ if os.name == 'nt':
 
 from datetime import datetime
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+# Agregar src al path de manera robusta
+SCRIPT_DIR = pathlib.Path(__file__).parent.resolve()
+sys.path.insert(0, str(SCRIPT_DIR / 'src'))
 
 from agents.orchestrator import OrchestratorAgent
 from agents.research_agent import ResearchAgent
 from agents.qa_agent import ContentQAAgent, ContentSecurityAgent
+from agents.image_agent import ImageAgent
+from agents.social_media_agent import SocialMediaAgent
 from services.cache_service import CacheService
 
 
@@ -158,6 +163,23 @@ def generate_article(topic, tone="profesional", use_research=False):
     except Exception as e:
         print(f"[WARN] QA no disponible: {e}")
     
+    # Generar imagen
+    print("[INFO] Generando imagen...")
+    try:
+        image_agent = ImageAgent()
+        image_result = image_agent.generate_for_article(
+            topic=topic,
+            title=article.get('title', topic)
+        )
+        
+        if image_result['success']:
+            print(f"[INFO] Imagen generada: {image_result['filepath']}")
+            article['image'] = image_result
+        else:
+            print(f"[WARN] No se pudo generar imagen: {image_result.get('error')}")
+    except Exception as e:
+        print(f"[WARN] ImageAgent no disponible: {e}")
+    
     return article
 
 
@@ -210,6 +232,43 @@ def main():
         if args.output in ['txt', 'both']:
             filename_txt = save_article(article, format='txt')
             print(f"[SUCCESS] Guardado: {filename_txt}")
+        
+        # Generar posts para redes sociales
+        print("\n[INFO] Generando posts para redes sociales...")
+        try:
+            social_agent = SocialMediaAgent()
+            social_results = social_agent.generate_all(article)
+            
+            # Guardar posts
+            os.makedirs("outputs", exist_ok=True)
+            social_file = f"outputs/social_posts_{article['topic'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            
+            with open(social_file, 'w', encoding='utf-8') as f:
+                f.write(f"Posts para redes sociales - Tema: {article['topic']}\n")
+                f.write("="*50 + "\n\n")
+                
+                for platform, result in social_results.items():
+                    f.write(f"--- {platform.upper()} ---\n")
+                    if result['success']:
+                        f.write(result['content'] + "\n\n")
+                    else:
+                        f.write(f"Error: {result.get('error')}\n\n")
+            
+            print(f"[SUCCESS] Posts guardados: {social_file}")
+            
+            # Mostrar posts
+            print("\n" + "="*50)
+            print("POSTS PARA REDES SOCIALES")
+            print("="*50)
+            for platform, result in social_results.items():
+                print(f"\n[{platform.upper()}]")
+                if result['success']:
+                    print(result['content'][:300] + "...")
+                else:
+                    print(f"Error: {result.get('error')}")
+            
+        except Exception as e:
+            print(f"[WARN] No se pudieron generar posts sociales: {e}")
         
         print(format_article_markdown(article))
     else:
