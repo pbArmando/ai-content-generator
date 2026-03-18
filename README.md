@@ -1,54 +1,50 @@
-# Content Automation
+# AI Content Automation System
 
-Sistema de generación de contenido con IA y búsqueda web automática.
+AI-powered platform for generating complete articles with automatic web research and social media content creation.
 
-## Tabla de Contenidos
+## Table of Contents
 
-1. [Requisitos Previos](#requisitos-previos)
-2. [Instalación](#instalación)
-3. [Configuración de API Keys](#configuración-de-api-keys)
-4. [Ejecución](#ejecución)
-5. [Estructura del Proyecto](#estructura-del-proyecto)
-6. [Cómo Funciona](#cómo-funciona)
-7. [Solución de Problemas](#solución-de-problemas)
+1. [Requirements](#requirements)
+2. [Installation](#installation)
+3. [API Keys Configuration](#api-keys-configuration)
+4. [Usage](#usage)
+5. [Project Structure](#project-structure)
+6. [How It Works](#how-it-works)
+7. [Features](#features)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
-## Requisitos Previos
+## Requirements
 
-### Software Necesario
+### Software
 
-| Software | Versión Mínima | Descripción |
-|----------|----------------|--------------|
-| Python | 3.8+ | Lenguaje de programación |
-| Git | 2.0+ | Control de versiones |
-| pip | 21.0+ | Gestor de paquetes Python |
+| Software | Min Version | Description |
+|----------|-------------|-------------|
+| Python | 3.8+ | Programming language |
+| Git | 2.0+ | Version control |
+| pip | 21.0+ | Python package manager |
 
-### Verificar Instalación
+### Verify Installation
 
 ```bash
-# Verificar Python
 python --version
-
-# Verificar pip
 pip --version
-
-# Verificar Git
 git --version
 ```
 
 ---
 
-## Instalación
+## Installation
 
-### Paso 1: Clonar el Repositorio
+### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/Bobiptus/ai-content-generator.git
+git clone https://github.com/BobiptusITE/ai-content-generator.git
 cd ai-content-generator
 ```
 
-### Paso 2: Crear Entorno Virtual
+### Step 2: Create Virtual Environment
 
 **Windows (PowerShell):**
 ```powershell
@@ -68,43 +64,21 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-### Paso 3: Actualizar pip (Recomendado)
-
-```bash
-python -m pip install --upgrade pip
-```
-
-### Paso 4: Instalar Dependencias
+### Step 3: Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Paso 5: Verificar Instalación
-
-```bash
-# Verificar que las librerías están instaladas
-pip list
-```
-
-Deberías ver:
-- google-generativeai
-- python-dotenv
-- requests
-- beautifulsoup4
-- groq
-- tavily
-- httpx
-
 ---
 
-## Configuración de API Keys
+## API Keys Configuration
 
-### Importante
+### Important
 
-**Cada usuario debe crear su propio archivo `.env` con sus API keys personales.** El archivo `.env` contiene claves privadas y **NO** debe compartirse.
+**Each user must create their own `.env` file with personal API keys.** The `.env` file contains private keys and **should NOT** be committed to git.
 
-### Paso 1: Copiar el Archivo de Ejemplo
+### Step 1: Copy Example File
 
 **Windows:**
 ```bash
@@ -116,282 +90,209 @@ copy .env.example .env
 cp .env.example .env
 ```
 
-### Paso 2: Obtener las API Keys
+### Step 2: Get API Keys
 
-#### GROQ_API_KEY (Requerida)
+#### GROQ_API_KEY (Required)
 
-Groq ofrece acceso gratuito a modelos LLM de alta calidad.
+Groq offers free access to high-quality LLM models.
 
-1. Ve a https://console.groq.com
-2. Crea una cuenta o inicia sesión
-3. Ve a "API Keys"
-4. Crea una nueva API Key
-5. Copia la key y pégala en `.env`
+1. Go to https://console.groq.com
+2. Create account or sign in
+3. Go to "API Keys"
+4. Create new API Key
+5. Copy and paste to `.env`
 
-**Ubicación en .env:**
 ```
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxx
 ```
 
-#### TAVILY_API_KEY (Requerida para búsqueda web)
+#### TAVILY_API_KEY (Required for web research)
 
-Tavily ofrece 1000 búsquedas/mes gratis.
+Tavily offers 1000 searches/month free.
 
-1. Ve a https://tavily.com
-2. Crea una cuenta o inicia sesión
-3. Ve a tu perfil o sección de API
-4. Copia tu API Key
-5. Pégala en `.env`
+1. Go to https://tavily.com
+2. Create account or sign in
+3. Go to your profile or API section
+4. Copy your API Key
+5. Paste to `.env`
 
-**Ubicación en .env:**
 ```
 TAVILY_API_KEY=tvly-xxxxxxxxxxxxxxxx
 ```
 
-#### GOOGLE_API_KEY (Opcional)
+#### GOOGLE_API_KEY (Optional)
 
-Solo necesaria si quieres usar Google Gemini como proveedor alternativo.
+Only needed if you want to use Google Gemini as an alternative provider.
 
-1. Ve a https://aistudio.google.com/app/apikey
-2. Crea una nueva API Key
-3. Copia y pega en `.env`
+1. Go to https://aistudio.google.com/app/apikey
+2. Create new API Key
+3. Copy and paste to `.env`
 
-**Ubicación en .env:**
 ```
 GOOGLE_API_KEY=AIzaxxxxxxxxxxxxxxxx
 ```
 
-### Paso 3: Estructura Final del .env
-
-Tu archivo `.env` debería verse así:
-
-```env
-GROQ_API_KEY=tu_groq_api_key_aqui
-TAVILY_API_KEY=tu_tavily_api_key_aqui
-GOOGLE_API_KEY=tu_google_api_key_aqui  # Opcional
-```
-
 ---
 
-## Ejecución
+## Usage
 
-### Ejecutar el Programa
+### Run the Program
 
 ```bash
 python generate_article.py
 ```
 
-### Interfaz de Usuario
+### Command Line Options
 
-El programa te guiará paso a paso:
-
-```
-======================================================================
-📰 GENERADOR DE ARTÍCULOS COMPLETOS CON IA
-======================================================================
-
-🔧 Inicializando sistema...
-✅ Usando Groq API (Llama 3.3 70B)
-✅ Sistema listo (con búsqueda web)
-
-📝 Configuración del artículo:
-----------------------------------------------------------------------
-Tema del artículo: [INGRESA TU TEMA]
+```bash
+python generate_article.py --topic "Your Topic" --tone profesional --research
 ```
 
-### Opciones Durante la Ejecución
+Options:
+- `--topic`, `-t`: Article topic
+- `--tone`: profesional, casual, tecnico
+- `--research`, `-r`: Enable web research
 
-1. **Tema del artículo:** Ingresa el tema sobre el cual quieres generar contenido
+### Interactive Mode
 
-2. **Búsqueda web:**
-   - `1` = Sí (recomendado - usa información actualizada de la web)
-   - `2` = No (usa solo el conocimiento del modelo LLM)
+The program will guide you through:
+1. Enter article topic
+2. Choose web research (recommended)
+3. Select tone (professional, casual, technical)
 
-3. **Tono del artículo:**
-   - `1` = Profesional (lenguaje formal y técnico)
-   - `2` = Casual (lenguaje amigable y conversacional)
-   - `3` = Técnico (terminología especializada)
+### Output
 
-### Salida
-
-Los artículos generados se guardan automáticamente en:
-- `outputs/article_[tema]_[fecha].md` (Markdown)
-- `outputs/article_[tema]_[fecha].txt` (Texto plano)
+Generated articles are saved to:
+- `outputs/article_[topic]_[date].md` (Markdown)
+- `outputs/article_[topic]_[date].txt` (Plain text)
+- `outputs/social_posts_[topic]_[date].txt` (Social media posts)
 
 ---
 
-## Estructura del Proyecto
+## Project Structure
 
 ```
 ai-content-generator/
-├── .env                    # Variables de entorno (NO subir a git)
-├── .env.example            # Plantilla de configuración
-├── .gitignore             # Archivos ignorados por git
-├── README.md              # Este archivo
-├── requirements.txt        # Dependencias Python
-├── generate_article.py    # Script principal
-├── main.py                # Script alternativo (outline básico)
+├── .env                    # Environment variables (DO NOT commit)
+├── .env.example            # Configuration template
+├── .gitignore             # Git ignore rules
+├── README.md              # This file
+├── requirements.txt        # Python dependencies
+├── generate_article.py    # Main script
 ├── src/
 │   ├── agents/
-│   │   ├── research_agent.py      # Agente de búsqueda web
-│   │   └── content_generator.py  # Generador de artículos
-│   ├── services/
-│   │   └── cache_service.py      # Cache con TTL de 24h
-│   └── utils/
-│       └── __init__.py
-└── outputs/                       # Artículos generados
-    ├── article_[tema]_[fecha].md
-    └── article_[tema]_[fecha].txt
+│   │   ├── research_agent.py        # Web research agent
+│   │   ├── orchestrator.py         # Agent orchestrator
+│   │   ├── content_generator.py    # Article generator
+│   │   ├── qa_agent.py             # Quality assurance
+│   │   ├── social_media_agent.py   # Social media posts
+│   │   └── image_agent.py          # Image generation (pending)
+│   └── services/
+│       └── cache_service.py        # 24-hour cache
+└── outputs/                       # Generated content
+    ├── article_*.md
+    ├── article_*.txt
+    └── social_posts_*.txt
 ```
 
 ---
 
-## Cómo Funciona
+## How It Works
 
-### Flujo de Ejecución
+### Execution Flow
 
 ```
 ┌─────────────────┐
-│ Usuario         │
-│ (ingresa tema) │
+│ User Input      │
+│ (topic, tone)  │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ ContentGenerator│
-└────────┬────────┘
-         │
-         ▼ (si búsqueda habilitada)
-┌─────────────────┐     ┌──────────────────┐
-│ ResearchAgent   │────▶│ Tavily API       │
-│ (búsqueda web)  │     │ (resúmenes web)  │
-└────────┬────────┘     └──────────────────┘
-         │
-         ▼ (resultados + cache)
-┌─────────────────┐
-│ LLM (Groq)     │
-│ + información  │
+│ ResearchAgent   │────▶ Tavily API
+│ (web search)   │     (1000/mo free)
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ Outline         │
-│ + Introducción │
-│ + Secciones    │
-│ + Conclusión   │
+│ Orchestrator    │
+│ (agents)        │
 └────────┬────────┘
          │
          ▼
 ┌─────────────────┐
-│ Archivo .md    │
-│ + .txt         │
+│ QA Agent        │────▶ Quality checks
+│ (validation)   │     Security scan
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Article + Posts │
+│ (output)        │
 └─────────────────┘
 ```
 
-### Componentes
+### Features
 
-#### 1. ResearchAgent
-- Realiza búsquedas en la web usando Tavily
-- Extrae información relevante sobre el tema
-- Guarda resultados en cache por 24 horas
-- Evita búsquedas重复idas del mismo tema
+| Feature | Description |
+|---------|-------------|
+| **Web Research** | Automatic information gathering with Tavily API |
+| **24h Cache** | Results cached for 24 hours |
+| **Multi-agent** | Specialized agents for each task |
+| **Quality Assurance** | Built-in validation and scoring |
+| **Social Media** | Auto-generates posts for Twitter, LinkedIn, Instagram, Facebook |
+| **Security Scan** | Detects sensitive content |
 
-#### 2. ContentGenerator
-- Genera outline estructurado del artículo
-- Escribe introducción atractiva
-- Desarrolla cada sección con contenido sustancial
-- Crea conclusión con llamado a la acción
+### Supported LLM Providers
 
-#### 3. CacheService
-- Almacena resultados de búsqueda
-- TTL (Time To Live) de 24 horas
-- Evita consumo innecesario de API
-- Mejora velocidad de ejecución
-
-### Proveedores LLM Soportados
-
-| Proveedor | Modelo | Estado | Notas |
-|-----------|--------|--------|-------|
-| Groq | Llama 3.3 70B | ✅ Predeterminado | Rápido y gratuito |
-| Google | Gemini 2.5 Flash | ✅ Opcional | Requiere API key |
+| Provider | Model | Status |
+|----------|-------|--------|
+| Groq | Llama 3.3 70B | ✅ Default (free) |
+| Google | Gemini 2.5 Flash | ✅ Optional |
 
 ---
 
-## Solución de Problemas
+## Troubleshooting
 
 ### Error: "No module named 'dotenv'"
 
-**Causa:** Las dependencias no se instalaron correctamente.
+**Cause:** Dependencies not installed.
 
-**Solución:**
+**Solution:**
 ```bash
 pip install python-dotenv
 ```
 
-### Error: "No se encontró GROQ_API_KEY"
+### Error: "GROQ_API_KEY not found"
 
-**Causa:** Falta la API key en el archivo `.env`.
+**Cause:** Missing API key in `.env`.
 
-**Solución:**
-1. Verifica que el archivo `.env` exista
-2. Asegúrate de que la línea `GROQ_API_KEY=...` esté presente
-3. Verifica que la API key sea correcta
-
-### Error: "Tavily no está instalado"
-
-**Causa:** La librería tavily no está instalada.
-
-**Solución:**
-```bash
-pip install tavily>=1.0.0
-```
+**Solution:**
+1. Verify `.env` file exists
+2. Ensure `GROQ_API_KEY=...` line is present
 
 ### Error: "Rate limit exceeded"
 
-**Causa:** Has excedido los límites de la API.
+**Solution:**
+- Wait 1 minute for Groq
+- For Tavily: wait until next month (1000 free searches/month)
 
-**Solución:**
-- Espera 1 minuto para Groq
-- Para Tavily: espera hasta el siguiente mes (1000 búsquedas/mes gratis)
+### Error: "venv\Scripts\Activate not recognized"
 
-### Error: "venv\Scripts\Activate no se reconoce"
-
-**Causa:** Estás usando PowerShell con política de ejecución restringida.
-
-**Solución:**
+**Solution:**
 ```powershell
-# Opción 1: Cambiar a CMD
+# Option 1: Use CMD
 cmd /k venv\Scripts\activate.bat
 
-# Opción 2: Habilitar scripts en PowerShell
+# Option 2: Enable scripts in PowerShell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-### El programa no responde
-
-**Causa:** La generación de contenido puede tomar 30-90 segundos.
-
-**Solución:**
-- Ten paciencia, es normal
-- Verifica tu conexión a internet
-
-### Verificar Configuración de APIs
-
-Puedes probar que las APIs estén configuradas correctamente:
-
-```bash
-# Probar Groq
-python -c "from groq import Groq; print('Groq OK')"
-
-# Probar Tavily
-python -c "from tavily import TavilyClient; print('Tavily OK')"
 ```
 
 ---
 
-## Actualización del Proyecto
+## Update Project
 
-Para obtener la última versión:
+To get the latest version:
 
 ```bash
 git pull origin main
@@ -399,21 +300,12 @@ git pull origin main
 
 ---
 
-## Licencia
+## License
 
 MIT
 
 ---
 
-## Contribuciones
+## Description (for resume)
 
-Las contribuciones son bienvenidas. Por favor, crea un fork del repositorio y envía un pull request.
-
----
-
-## Soporte
-
-Si tienes problemas:
-1. Revisa la sección de [Solución de Problemas](#solución-de-problemas)
-2. Busca en los issues de GitHub
-3. Crea un nuevo issue si no encuentras solución
+**AI Content Automation System** - Python platform that generates articles with AI using multi-agent architecture (research, QA, social media). Integrates Tavily API for web research and creates posts for Twitter, LinkedIn, Instagram, and Facebook.
