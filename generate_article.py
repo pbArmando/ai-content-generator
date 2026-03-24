@@ -29,6 +29,7 @@ from agents.research_agent import ResearchAgent
 from agents.qa_agent import ContentQAAgent, ContentSecurityAgent
 from agents.image_agent import ImageAgent
 from agents.social_media_agent import SocialMediaAgent
+from agents.text_overlay_agent import TextOverlayAgent
 from services.cache_service import CacheService
 
 
@@ -269,29 +270,52 @@ def main():
         except Exception as e:
             print(f"[WARN] No se pudieron generar posts sociales: {e}")
         
-        # Generar imágenes para redes sociales
-        print("\n[INFO] Generando imagenes para redes sociales...")
+        # Generar PROMPTS para imágenes de redes sociales
+        print("\n[INFO] Generando prompts para imagenes...")
         try:
             image_agent = ImageAgent()
             
             platforms = ['instagram', 'twitter', 'facebook', 'linkedin']
-            social_images = {}
+            social_prompts = {}
+            
+            print("\n" + "="*50)
+            print("PROMPTS PARA IA DE IMAGENES")
+            print("="*50)
             
             for platform in platforms:
-                print(f"\n  [{platform.upper()}]")
                 result = image_agent.generate_social_post(article, platform)
+                prompt = result.get('prompt', 'N/A')
                 
-                if result['success']:
-                    print(f"    [OK] Guardada: {result['filepath']}")
-                    social_images[platform] = result
-                else:
-                    print(f"    [ERROR] {result.get('error')}")
-                    social_images[platform] = None
+                print(f"\n[{platform.upper()}]")
+                print(f"Prompt: {prompt}")
+                print(f"-"*50)
+                
+                social_prompts[platform] = {
+                    'prompt': prompt,
+                    'platform': platform,
+                    'size': result.get('size', 'N/A')
+                }
             
-            article['social_images'] = social_images
+            # Guardar prompts en archivo
+            prompts_file = f"outputs/image_prompts_{article['topic'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            os.makedirs("outputs", exist_ok=True)
+            
+            with open(prompts_file, 'w', encoding='utf-8') as f:
+                f.write(f"Prompts para Imagenes - Tema: {article['topic']}\n")
+                f.write(f"Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                f.write("="*50 + "\n\n")
+                
+                for platform, data in social_prompts.items():
+                    f.write(f"[{platform.upper()}] - {data['size']}\n")
+                    f.write(f"{data['prompt']}\n\n")
+            
+            print(f"\n[INFO] Prompts guardados en: {prompts_file}")
+            print("[INFO] Usa estos prompts en tu IA favorita (Midjourney, DALL-E, etc.)")
+            
+            article['social_prompts'] = social_prompts
             
         except Exception as e:
-            print(f"[WARN] No se pudieron generar imagenes sociales: {e}")
+            print(f"[WARN] Error al generar prompts: {e}")
         
         print(format_article_markdown(article))
     else:
