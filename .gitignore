@@ -21,3 +21,9 @@ cache/
 # OS
 .DS_Store
 Thumbs.db
+
+# Archivos locales (no compartir)
+AGENTS.md
+INSTALACION.md
+*.bat
+*.ps1
